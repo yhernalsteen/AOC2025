@@ -1,4 +1,6 @@
 ﻿using AOC2025.Puzzles;
+using BenchmarkDotNet.Characteristics;
+using BenchmarkDotNet.Running;
 
 namespace AOC2025
 {
@@ -6,10 +8,18 @@ namespace AOC2025
     {
         static void Main(string[] args)
         {
-            var solution = P5.Solve1();
-            Console.WriteLine(solution);
-            solution = P5.Solve2();
-            Console.WriteLine(solution);
+
+#if DEBUG
+            var solver = new Solver();
+
+            var solution1 = solver.SolvePart1();
+            Console.WriteLine(solution1);
+
+            var solution2 = solver.SolvePart2();
+            Console.WriteLine(solution2);
+#else
+            BenchmarkRunner.Run<BenchmarkedSolver>();
+#endif
         }
     }
 }
