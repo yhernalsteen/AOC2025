@@ -33,6 +33,43 @@ public static class P8
 
         return graph.KruskalAlgorithm(1000);
     }
+    
+    
+    public static long Solve2()
+    {
+        var lines = Utils.ConvertFileToListString(nameof(P8));
+        var points = new List<Point>();
+
+        for (var i = 0; i < lines.Count; i++)
+        {
+            var line = lines[i].Trim();
+            var coordinates = line.Split(",");
+            var x = int.Parse(coordinates[0]);
+            var y = int.Parse(coordinates[1]);
+            var z = int.Parse(coordinates[2]);
+            points.Add(new Point(x, y, z, i));
+        }
+
+        var graph = new Graph(points.Count);
+        for (var i = 0; i < points.Count; i++)
+        {
+            for (var j = i + 1; j < points.Count; j++)
+            {
+                var point = points[i];
+                var point2 = points[j];
+                var distance = Distance(point, point2);
+                
+                graph.AddEdge(point, point2, distance);
+            }
+        }
+        
+        var (id1, id2) = graph.KruskalAlgorithm();
+        
+        var p1 = points.Single(x => x.Id == id1);
+        var p2 = points.Single(x => x.Id == id2);
+
+        return p2.X * p1.X;
+    }
 
     private static long Distance(Point point1, Point point2)
     {
@@ -41,11 +78,6 @@ public static class P8
         var dz = (long) point2.Z - point1.Z;
         // skipping the sqrt for optimal time
         return (dx * dx) + (dy * dy) + (dz * dz);
-    }
-
-    public static long Solve2()
-    {
-        return 0;
     }
 
     private struct Point
@@ -167,6 +199,34 @@ public static class P8
         private void SortEdges()
         {
             _edges = _edges.OrderBy(e => e.Distance).ToList();
+        }
+
+        public (long, long) KruskalAlgorithm()
+        {
+            SortEdges();
+            
+            var disjointSet = new DisjointSet(_vertexCount);
+            var count = 0;
+            
+            foreach (var edge in _edges)
+            {
+                var x = edge.P1;
+                var y = edge.P2;
+
+                if (disjointSet.Find(x) != disjointSet.Find(y))
+                {
+                    disjointSet.Union(x, y);
+                    count++;
+                }
+                
+                if (count >= _vertexCount -1)
+                {
+                    return (x, y);
+                }
+                
+            }
+
+            throw new Exception("Could not find disjoint set");
         }
 
         public long KruskalAlgorithm(int maxSteps)
